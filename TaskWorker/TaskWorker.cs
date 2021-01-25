@@ -137,7 +137,8 @@ namespace NetEti.ApplicationControl
             this._cancellationToken.Register(() => this.cancelNotification());
 
             this._asyncWorkerTask = new Task(() => this.runAsync(0, parameters));
-            this._asyncWorkerTask.Start();
+            try { this._asyncWorkerTask.Start(); }
+            catch { } // System.InvalidOperationException HResult = 0x80131509 Nachricht = "Start" kann nicht für eine Aufgabe aufgerufen werden, die bereits gestartet wurde. 
         }
 
         /// <summary>
