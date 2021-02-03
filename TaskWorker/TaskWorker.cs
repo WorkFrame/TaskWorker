@@ -115,13 +115,17 @@ namespace NetEti.ApplicationControl
         /// <param name="worker">Callback-Action für die Task.</param>
         public void RunTask(Action<TaskWorker> worker)
         {
-            this._worker = worker;
-            this._cancellationTokenSource = new CancellationTokenSource();
-            this._cancellationToken = this._cancellationTokenSource.Token;
-            this._cancellationToken.Register(() => this.cancelNotification());
+            lock (this._runTaskLocker)
+            {
+                this._worker = worker;
+                this._cancellationTokenSource = new CancellationTokenSource();
+                this._cancellationToken = this._cancellationTokenSource.Token;
+                this._cancellationToken.Register(() => this.cancelNotification());
 
-            this._asyncWorkerTask = new Task(() => this.runAsync(0));
-            this._asyncWorkerTask.Start();
+                this._asyncWorkerTask = new Task(() => this.runAsync(0));
+                try { this._asyncWorkerTask.Start(); }
+                catch { } // System.InvalidOperationException HResult = 0x80131509 Nachricht = "Start" kann nicht für eine Aufgabe aufgerufen werden, die bereits gestartet wurde. 
+            }
         }
 
         /// <summary>
@@ -131,14 +135,17 @@ namespace NetEti.ApplicationControl
         /// <param name="parameters">Parameter für die Callback-Action für die Task.</param>
         public void RunTask(Action<TaskWorker, object> worker, object parameters)
         {
-            this._worker2 = worker;
-            this._cancellationTokenSource = new CancellationTokenSource();
-            this._cancellationToken = this._cancellationTokenSource.Token;
-            this._cancellationToken.Register(() => this.cancelNotification());
+            lock (this._runTaskLocker)
+            {
+                this._worker2 = worker;
+                this._cancellationTokenSource = new CancellationTokenSource();
+                this._cancellationToken = this._cancellationTokenSource.Token;
+                this._cancellationToken.Register(() => this.cancelNotification());
 
-            this._asyncWorkerTask = new Task(() => this.runAsync(0, parameters));
-            try { this._asyncWorkerTask.Start(); }
-            catch { } // System.InvalidOperationException HResult = 0x80131509 Nachricht = "Start" kann nicht für eine Aufgabe aufgerufen werden, die bereits gestartet wurde. 
+                this._asyncWorkerTask = new Task(() => this.runAsync(0, parameters));
+                try { this._asyncWorkerTask.Start(); }
+                catch { } // System.InvalidOperationException HResult = 0x80131509 Nachricht = "Start" kann nicht für eine Aufgabe aufgerufen werden, die bereits gestartet wurde. 
+            }
         }
 
         /// <summary>
@@ -211,7 +218,10 @@ namespace NetEti.ApplicationControl
         /// <summary>
         /// Standard-Konstruktor.
         /// </summary>
-        public TaskWorker() { }
+        public TaskWorker()
+        {
+            this._runTaskLocker = new object();
+        }
 
         #endregion public members
 
@@ -223,6 +233,7 @@ namespace NetEti.ApplicationControl
         private Action<TaskWorker> _worker;
         private Action<TaskWorker, object> _worker2;
         private bool _haltRequested;
+        private object _runTaskLocker;
 
         /// <summary>
         /// Informiert über den Abbruch der Verarbeitung.
