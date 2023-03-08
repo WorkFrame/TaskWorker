@@ -1,7 +1,5 @@
-﻿using System;
-using NetEti.Globals;
-using System.Threading;
-using NetEti.ApplicationControl;
+﻿using NetEti.ApplicationControl;
+using System.ComponentModel;
 
 namespace NetEti.DemoApplications
 {
@@ -54,21 +52,22 @@ namespace NetEti.DemoApplications
         {
             try
             {
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 0, ItemsTypes.items, null));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(0, null));
                 Thread.Sleep(2000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 20, ItemsTypes.items, null));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(20, null));
                 Thread.Sleep(2000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 40, ItemsTypes.items, null));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(40, null));
                 Thread.Sleep(2000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 60, ItemsTypes.items, null));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(60, null));
                 Thread.Sleep(2000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 80, ItemsTypes.items, null));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(80, null));
                 Thread.Sleep(2000);
                 taskTest.OnTaskProgressFinished(null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Work " + ex.GetType().ToString() + ": " + ex.Message);
+                Console.WriteLine("Harry ");
+                //Console.WriteLine("Work " + ex.GetType().ToString() + ": " + ex.Message);
                 throw;
             }
         }
@@ -77,39 +76,41 @@ namespace NetEti.DemoApplications
         {
             try
             {
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 0, ItemsTypes.items, parameters));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(0, parameters));
                 Thread.Sleep(3000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 20, ItemsTypes.items, parameters));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(20, parameters));
                 Thread.Sleep(3000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 40, ItemsTypes.items, parameters));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(40, parameters));
                 Thread.Sleep(3000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 60, ItemsTypes.items, parameters));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(60, parameters));
                 Thread.Sleep(3000);
-                taskTest.OnTaskProgressChanged(new CommonProgressChangedEventArgs("TaskTest", 100, 80, ItemsTypes.items, parameters));
+                taskTest.OnTaskProgressChanged(new ProgressChangedEventArgs(80, parameters));
                 Thread.Sleep(3000);
                 taskTest.OnTaskProgressFinished(null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Work2 " + ex.GetType().ToString() + ": " + ex.Message);
+                // Console.WriteLine("Work2 " + ex.GetType().ToString() + ": " + ex.Message);
+                Console.WriteLine("Hirsch");
                 throw;
             }
         }
 
-        static void SubTaskProgressChanged(object sender, CommonProgressChangedEventArgs args)
+        static void SubTaskProgressChanged(object? sender, ProgressChangedEventArgs args)
         {
-            Console.WriteLine("Changed - {0}: {1} von {2} {3}", args.ItemName, args.CountSucceeded, args.CountAll, args.UserState == null ? "" : args.UserState.ToString());
+            string userState = args.UserState == null ? "" : args.UserState.ToString()?? "";
+            Console.WriteLine($"ProgressPercentage: {args.ProgressPercentage}, UserState: {userState}");
         }
 
-        static void SubTaskProgressFinished(object sender, Exception threadException)
+        static void SubTaskProgressFinished(object? sender, RunWorkerCompletedEventArgs e)
         {
-            if (threadException == null)
+            if (e.Error == null && !e.Cancelled)
             {
                 Console.WriteLine("Finished with success");
             }
             else
             {
-                Console.WriteLine("Aborted with '{0}'", threadException.Message);
+                Console.WriteLine("Aborted with '{0}'", e.Error?.Message);
             }
         }
     }

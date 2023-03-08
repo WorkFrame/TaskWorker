@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using NetEti.Globals;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace NetEti.ApplicationControl
 {
@@ -75,12 +72,12 @@ namespace NetEti.ApplicationControl
         /// <summary>
         /// Wird aufgerufen, wenn sich der Verarbeitungs-Fortschritt einer Task geändert hat.
         /// </summary>
-        public event CommonProgressChangedEventHandler TaskProgressChanged;
+        public event ProgressChangedEventHandler? TaskProgressChanged;
 
         /// <summary>
         /// Wird aufgerufen, wenn die Verarbeitung einer Task abgeschlossen wurde.
         /// </summary>
-        public event CommonProgressFinishedEventHandler TaskProgressFinished;
+        public event RunWorkerCompletedEventHandler? TaskProgressFinished;
 
         /// <summary>
         /// Aktueller Zustand des TaskWorkers: Ready, Running oder Halted.
@@ -175,7 +172,7 @@ namespace NetEti.ApplicationControl
         /// TaskProgressChanged eingehängt haben.
         /// </summary>
         /// <param name="args">Informationen über den Verarbeitungsfortschritt.</param>
-        public void OnTaskProgressChanged(CommonProgressChangedEventArgs args)
+        public void OnTaskProgressChanged(ProgressChangedEventArgs args)
         {
             if (this._haltRequested)
             {
@@ -206,14 +203,15 @@ namespace NetEti.ApplicationControl
         /// TaskProgressFinished eingehängt haben.
         /// </summary>
         /// <param name="threadException">Eventuell Exception aus der Task oder null.</param>
-        public void OnTaskProgressFinished(Exception threadException)
+        public void OnTaskProgressFinished(Exception? threadException)
         {
             this.WorkerStatus = TaskWorkerStatus.Ready;
             if (TaskProgressFinished != null)
             {
-                TaskProgressFinished(null, threadException);
+                TaskProgressFinished(this, new RunWorkerCompletedEventArgs(null, threadException, false));
             }
         }
+
 
         /// <summary>
         /// Standard-Konstruktor.
@@ -227,11 +225,11 @@ namespace NetEti.ApplicationControl
 
         #region private members
 
-        private Task _asyncWorkerTask;
-        private CancellationTokenSource _cancellationTokenSource { get; set; }
+        private Task? _asyncWorkerTask;
+        private CancellationTokenSource? _cancellationTokenSource { get; set; }
         private CancellationToken _cancellationToken;
-        private Action<TaskWorker> _worker;
-        private Action<TaskWorker, object> _worker2;
+        private Action<TaskWorker>? _worker;
+        private Action<TaskWorker, object>? _worker2;
         private bool _haltRequested;
         private object _runTaskLocker;
 
@@ -241,7 +239,7 @@ namespace NetEti.ApplicationControl
         private void cancelNotification()
         {
             //Console.WriteLine("TaskTest.cancelNotification - Cancellation request");
-            this.OnTaskProgressChanged(new CommonProgressChangedEventArgs(0, null));
+            this.OnTaskProgressChanged(new ProgressChangedEventArgs(0, null));
         }
 
         /// <summary>
@@ -249,7 +247,7 @@ namespace NetEti.ApplicationControl
         /// </summary>
         /// <param name="dummy">Aus Kompatibilitätsgründen, wird hier nicht genutzt.</param>
         /// <param name="parameters">Parameter für die asynchron auszuführende Routine.</param>
-        private void runAsync(long dummy, object parameters = null)
+        private void runAsync(long dummy, object? parameters = null)
         {
             this.runAsync(parameters);
         }
@@ -258,19 +256,24 @@ namespace NetEti.ApplicationControl
         /// Eigene Task Action für den Run einer Task.
         /// </summary>
         /// <param name="parameters">Parameter für die asynchron auszuführende Routine.</param>
-        private void runAsync(object parameters)
+        private void runAsync(object? parameters)
         {
             if (!this._cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    if (parameters != null)
+                    if (parameters != null && this._worker2 != null)
                     {
                         this._worker2(this, parameters);
                     }
                     else
                     {
+                        if (this._worker == null)
+                        {
+                            throw new ApplicationException("Beide Worker sind nicht aufrufbar oder null!");
+                        }
                         this._worker(this);
+
                     }
                 }
                 catch (System.OperationCanceledException ex)
