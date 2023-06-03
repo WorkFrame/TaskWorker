@@ -66,8 +66,7 @@ namespace NetEti.DemoApplications
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Harry ");
-                //Console.WriteLine("Work " + ex.GetType().ToString() + ": " + ex.Message);
+                Console.WriteLine("Work " + ex.GetType().ToString() + ": " + ex.Message);
                 throw;
             }
         }
@@ -90,8 +89,7 @@ namespace NetEti.DemoApplications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Work2 " + ex.GetType().ToString() + ": " + ex.Message);
-                Console.WriteLine("Hirsch");
+                Console.WriteLine("Work2 " + ex.GetType().ToString() + ": " + ex.Message);
                 throw;
             }
         }
