@@ -12,8 +12,8 @@
     <Company>NetEti</Company>
     <Description>Assembly für die Ausführung von Routinen in separaten Tasks</Description>
     <Copyright>Copyright © NetEti 2013-2023</Copyright>
-    <AssemblyVersion>7.0.1.0</AssemblyVersion>
-    <FileVersion>7.0.1.0</FileVersion>
+    <AssemblyVersion>7.0.1.1</AssemblyVersion>
+    <FileVersion>7.0.1.1</FileVersion>
     <PackageTags>NetEti Framework Task Parallel</PackageTags>
   </PropertyGroup>
 
