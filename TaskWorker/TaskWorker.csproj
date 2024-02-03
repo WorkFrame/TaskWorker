@@ -11,7 +11,7 @@
     <Authors>Erik Nagel</Authors>
     <Company>NetEti</Company>
     <Description>Assembly für die Ausführung von Routinen in separaten Tasks</Description>
-    <Copyright>Copyright © NetEti 2013-2023</Copyright>
+    <Copyright>Copyright © NetEti 2013-$([System.DateTime]::Now.Year)</Copyright>
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
     <FileVersion>8.0.0.0</FileVersion>
     <PackageTags>NetEti Framework Task Parallel</PackageTags>
